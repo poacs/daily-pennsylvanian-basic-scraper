@@ -29,11 +29,21 @@ def scrape_data_point():
 
     if req.ok:
         soup = bs4.BeautifulSoup(req.text, "html.parser")
-        target_element = soup.find("a", class_="frontpage-link")
-        data_point = "" if target_element is None else target_element.text
-        loguru.logger.info(f"Data point: {data_point}")
-        return data_point
 
+        # find the <h3 class="standard-link"> element
+        h3_element = soup.find("h3", class_="standard-link")
+        if h3_element:
+            # find the <a> inside that h3
+            link_element = h3_element.find("a")
+            if link_element:
+                headline_text = link_element.get_text(strip=True)
+                loguru.logger.info(f"Data point: {headline_text}")
+                return headline_text
+        
+        # if the element isn't found or request isn't okay, return empty
+        loguru.logger.warning("No headline found in h3.standard-link")
+    
+    return ""
 
 if __name__ == "__main__":
 
